@@ -1,0 +1,1844 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 賦能運算思維教學平台 ｜ 先思考‧後驗證</title>
+<meta name="description" content="基於郭博仁（2026）研究的 AI 賦能運算思維教學整合平台：心智圖→IPO 分解、AI 驗證夥伴、運算思維與 4C 素養自評量表、教師評量後臺。">
+<meta name="author" content="郭博仁 Po-Jen Kuo｜NPUST">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Noto+Serif+TC:wght@400;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+<style>
+/* =========================================================
+   設計系統｜編輯式學術風（Editorial Academic）
+   ========================================================= */
+:root{
+  --ink:      #1c2630;
+  --ink-2:    #3a4856;
+  --muted:    #6b7785;
+  --paper:    #fbf7ee;
+  --paper-2:  #f4eee0;
+  --line:     #d8cfbe;
+  --line-soft:#e8e2d2;
+  --bg:       #efe9da;
+
+  /* IPO 色票（與論文圖表一致） */
+  --c-input:    #6b46c1;   --c-input-bg:    #efe5fb;
+  --c-process:  #c2410c;   --c-process-bg:  #fdecd6;
+  --c-output:   #be123c;   --c-output-bg:   #fde2e8;
+
+  /* 階段色票（四階段教學模型） */
+  --c-p1:#2b6cb0; --c-p1-bg:#e3eefb;
+  --c-p2:#c2410c; --c-p2-bg:#fdecd6;
+  --c-p3:#2f855a; --c-p3-bg:#dff0e5;
+  --c-p4:#7b4fb1; --c-p4-bg:#efe5fb;
+
+  --accent: #be123c;
+  --gold:#b08a30;
+
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 2px 6px rgba(28,38,48,.06);
+  --shadow:    0 6px 24px rgba(28,38,48,.10);
+}
+
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:"Noto Sans TC", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color:var(--ink);
+  background:var(--bg);
+  background-image:radial-gradient(rgba(28,38,48,.05) .8px, transparent .8px);
+  background-size:22px 22px;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  min-height:100vh;
+}
+
+/* ---------- 共用元件 ---------- */
+.serif{font-family:"Noto Serif TC", serif;}
+.mono{font-family:"JetBrains Mono", monospace;}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input, textarea, select{font-family:inherit;color:inherit}
+a{color:inherit;text-decoration:none}
+
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+
+/* =========================================================
+   頂部品牌列 + 導覽
+   ========================================================= */
+.topbar{
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:saturate(140%) blur(6px);
+}
+.topbar-inner{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;gap:20px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.brand-mark{
+  width:42px;height:42px;flex-shrink:0;
+  background:var(--ink);color:var(--paper);
+  display:grid;place-items:center;border-radius:8px;
+  font-family:"Noto Serif TC", serif;font-weight:900;font-size:22px;
+  box-shadow:var(--shadow-sm);
+}
+.brand-text h1{
+  font-family:"Noto Serif TC", serif;font-weight:900;
+  font-size:18px;letter-spacing:.5px;line-height:1.25;
+}
+.brand-text .sub{
+  font-size:11.5px;color:var(--muted);letter-spacing:1.5px;
+  text-transform:uppercase;margin-top:2px;
+}
+.nav{
+  display:flex;gap:4px;flex-wrap:wrap;align-items:center;
+}
+.nav-btn{
+  padding:8px 14px;font-size:13.5px;font-weight:500;
+  color:var(--ink-2);border-radius:999px;
+  transition:all .15s ease;border:1px solid transparent;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.nav-btn:hover{background:var(--paper-2);color:var(--ink)}
+.nav-btn.active{
+  background:var(--ink);color:var(--paper);
+  box-shadow:var(--shadow-sm);
+}
+.nav-btn .nav-num{
+  font-family:"Noto Serif TC", serif;font-weight:700;
+  font-size:11px;opacity:.7;margin-right:2px;
+}
+
+/* 學生/教師切換 */
+.role-switch{
+  display:flex;background:var(--paper-2);border-radius:999px;padding:3px;
+  border:1px solid var(--line-soft);
+}
+.role-btn{
+  padding:6px 14px;font-size:12.5px;font-weight:500;
+  color:var(--muted);border-radius:999px;transition:all .15s ease;
+}
+.role-btn.active{
+  background:var(--paper);color:var(--ink);
+  box-shadow:var(--shadow-sm);
+}
+
+/* =========================================================
+   主要區塊 / 區段切換
+   ========================================================= */
+main{padding:32px 0 80px}
+.section{display:none}
+.section.active{display:block;animation:fadeIn .25s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.section-head{
+  display:flex;align-items:flex-end;justify-content:space-between;
+  margin-bottom:28px;gap:20px;flex-wrap:wrap;
+  border-bottom:1.5px solid var(--ink);padding-bottom:14px;
+}
+.section-head h2{
+  font-family:"Noto Serif TC", serif;font-weight:900;
+  font-size:34px;letter-spacing:.5px;line-height:1.15;
+}
+.section-head .eyebrow{
+  font-size:11px;letter-spacing:3px;color:var(--accent);
+  text-transform:uppercase;font-weight:700;margin-bottom:6px;
+}
+.section-head .desc{
+  font-size:14px;color:var(--muted);max-width:520px;line-height:1.7;
+}
+
+/* ---------- 卡片 ---------- */
+.card{
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:22px;
+  box-shadow:var(--shadow-sm);
+  margin-bottom:18px;
+}
+.card-title{
+  font-family:"Noto Serif TC", serif;font-weight:700;
+  font-size:18px;margin-bottom:14px;display:flex;align-items:center;gap:10px;
+  border-bottom:1px dashed var(--line);padding-bottom:10px;
+}
+.card-title .badge{
+  font-size:10.5px;font-weight:700;letter-spacing:1px;
+  padding:2px 8px;border-radius:4px;color:#fff;
+  font-family:"Noto Sans TC";
+}
+
+/* =========================================================
+   HOME ─ 首頁：理論框架 + 4 階段
+   ========================================================= */
+.hero{
+  background:linear-gradient(180deg, var(--paper) 0%, var(--paper-2) 100%);
+  border:1px solid var(--line);border-radius:var(--radius);
+  padding:48px 44px;margin-bottom:28px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:"";position:absolute;top:-40px;right:-40px;
+  width:180px;height:180px;border-radius:50%;
+  background:radial-gradient(circle, rgba(190,18,60,.08), transparent 70%);
+}
+.hero-eyebrow{
+  font-size:11px;letter-spacing:4px;color:var(--accent);
+  font-weight:700;text-transform:uppercase;
+  display:inline-block;padding-bottom:6px;
+  border-bottom:1.5px solid var(--accent);
+}
+.hero h1{
+  font-family:"Noto Serif TC", serif;font-weight:900;
+  font-size:48px;line-height:1.15;margin:18px 0;letter-spacing:.5px;
+  max-width:780px;
+}
+.hero .lead{
+  font-size:16px;color:var(--ink-2);max-width:680px;line-height:1.8;
+}
+.hero .meta{
+  display:flex;gap:32px;margin-top:24px;flex-wrap:wrap;
+  font-size:13px;color:var(--muted);
+}
+.hero .meta strong{color:var(--ink);font-family:"Noto Serif TC",serif}
+
+/* 三大理論卡 */
+.theory-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:28px;
+}
+.theory-card{
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius-sm);padding:20px;
+  position:relative;
+}
+.theory-card .num{
+  position:absolute;top:14px;right:18px;
+  font-family:"Noto Serif TC", serif;font-weight:900;
+  font-size:34px;color:var(--line);
+}
+.theory-card h4{
+  font-family:"Noto Serif TC",serif;font-weight:700;
+  font-size:17px;margin-bottom:10px;
+}
+.theory-card p{font-size:13.5px;color:var(--ink-2);line-height:1.7}
+.theory-card .cite{
+  font-size:11px;color:var(--muted);margin-top:8px;font-style:italic;
+}
+
+/* 四階段教學流程 */
+.phases-title{
+  font-family:"Noto Serif TC",serif;font-weight:900;
+  font-size:24px;margin-bottom:18px;display:flex;align-items:center;gap:12px;
+}
+.phases-title::after{
+  content:"";flex:1;height:1px;background:var(--line);
+}
+.phases{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;
+}
+.phase{
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius-sm);padding:22px 18px;
+  transition:transform .2s ease, box-shadow .2s ease;
+  cursor:pointer;position:relative;
+}
+.phase:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.phase .ph-tag{
+  display:inline-block;font-size:10px;letter-spacing:2px;
+  padding:3px 8px;border-radius:3px;font-weight:700;color:#fff;
+  font-family:"Noto Sans TC";
+}
+.phase[data-phase="1"] .ph-tag{background:var(--c-p1)}
+.phase[data-phase="2"] .ph-tag{background:var(--c-p2)}
+.phase[data-phase="3"] .ph-tag{background:var(--c-p3)}
+.phase[data-phase="4"] .ph-tag{background:var(--c-p4)}
+.phase h4{
+  font-family:"Noto Serif TC",serif;font-weight:700;
+  font-size:18px;margin:10px 0 8px;
+}
+.phase p{font-size:13px;color:var(--ink-2);line-height:1.65}
+.phase .ph-go{
+  margin-top:14px;display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:700;color:var(--accent);
+  border-bottom:1.5px solid currentColor;padding-bottom:1px;
+}
+
+/* 統計亮點 */
+.stats{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  background:var(--ink);color:var(--paper);
+  border-radius:var(--radius);overflow:hidden;
+  margin-top:6px;
+}
+.stat{
+  padding:24px 20px;border-right:1px solid rgba(255,255,255,.08);
+}
+.stat:last-child{border-right:none}
+.stat .num{
+  font-family:"Noto Serif TC",serif;font-weight:900;
+  font-size:38px;line-height:1;
+}
+.stat .num small{font-size:18px;font-weight:400;opacity:.7;margin-left:2px}
+.stat .lbl{font-size:12px;color:rgba(251,247,238,.7);margin-top:6px;letter-spacing:1px}
+
+/* =========================================================
+   通用：按鈕、輸入
+   ========================================================= */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:10px 18px;border-radius:8px;font-weight:600;font-size:14px;
+  border:1.5px solid transparent;transition:all .15s ease;
+  background:var(--ink);color:var(--paper);
+}
+.btn:hover{transform:translateY(-1px);box-shadow:var(--shadow-sm)}
+.btn-secondary{
+  background:var(--paper);color:var(--ink);border-color:var(--line);
+}
+.btn-ghost{
+  background:transparent;color:var(--ink);border-color:var(--line);
+}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-sm{padding:6px 12px;font-size:12.5px}
+
+input[type="text"], input[type="number"], textarea, select{
+  width:100%;padding:10px 14px;
+  background:#fff;border:1px solid var(--line);
+  border-radius:8px;font-size:14px;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+input:focus, textarea:focus, select:focus{
+  outline:none;border-color:var(--ink);
+  box-shadow:0 0 0 3px rgba(28,38,48,.08);
+}
+textarea{resize:vertical;min-height:80px;line-height:1.6}
+label{
+  display:block;font-size:13px;font-weight:600;
+  color:var(--ink-2);margin-bottom:6px;
+}
+.field-help{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+
+/* =========================================================
+   模組 1：心智圖 → IPO
+   ========================================================= */
+.mind-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:18px;
+}
+@media (max-width:900px){.mind-grid{grid-template-columns:1fr}}
+
+.branch{
+  border:1.5px solid var(--line);border-radius:var(--radius-sm);
+  padding:16px;background:var(--paper);
+}
+.branch-head{
+  display:flex;align-items:center;gap:8px;margin-bottom:10px;
+  font-family:"Noto Serif TC",serif;font-weight:700;font-size:15px;
+}
+.branch-icon{
+  width:32px;height:32px;border-radius:6px;
+  display:grid;place-items:center;font-size:16px;
+}
+.branch[data-type="input"] .branch-icon{background:var(--c-input-bg);color:var(--c-input)}
+.branch[data-type="process"] .branch-icon{background:var(--c-process-bg);color:var(--c-process)}
+.branch[data-type="output"] .branch-icon{background:var(--c-output-bg);color:var(--c-output)}
+.branch textarea{min-height:120px;font-size:13.5px}
+
+.example-pills{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 18px}
+.pill{
+  padding:6px 12px;font-size:12.5px;font-weight:500;
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:999px;color:var(--ink-2);cursor:pointer;
+  transition:all .15s ease;
+}
+.pill:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+
+.ipo-result{
+  display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-top:18px;
+}
+@media (max-width:900px){.ipo-result{grid-template-columns:1fr}}
+.ipo-block{
+  border-radius:var(--radius-sm);padding:18px;
+  border:1.5px solid;position:relative;
+}
+.ipo-block[data-type="input"]{background:var(--c-input-bg);border-color:var(--c-input)}
+.ipo-block[data-type="process"]{background:var(--c-process-bg);border-color:var(--c-process)}
+.ipo-block[data-type="output"]{background:var(--c-output-bg);border-color:var(--c-output)}
+.ipo-block h5{
+  font-family:"Noto Serif TC",serif;font-weight:700;font-size:16px;margin-bottom:10px;
+}
+.ipo-block ul{list-style:none;padding-left:0}
+.ipo-block li{
+  padding:6px 0 6px 18px;font-size:13.5px;position:relative;line-height:1.6;
+  border-bottom:1px dashed rgba(0,0,0,.08);
+}
+.ipo-block li:last-child{border-bottom:none}
+.ipo-block li::before{
+  content:"▸";position:absolute;left:0;top:6px;font-weight:700;
+}
+
+/* =========================================================
+   模組 2：IPO 程式生成（模擬）
+   ========================================================= */
+.code-pane{
+  background:#1a2028;color:#e6e9ef;
+  border-radius:var(--radius-sm);
+  padding:18px 20px;font-family:"JetBrains Mono",monospace;
+  font-size:13px;line-height:1.65;
+  max-height:480px;overflow:auto;
+  border:1px solid #2c3540;
+  white-space:pre-wrap;word-break:break-word;
+}
+.code-pane .kw{color:#c596f7}
+.code-pane .str{color:#a3e4b2}
+.code-pane .com{color:#7a8694;font-style:italic}
+.code-pane .fn{color:#fbd38d}
+.code-pane .num{color:#f9a8d4}
+
+.steps{
+  display:flex;gap:0;background:var(--paper-2);
+  border:1px solid var(--line);border-radius:var(--radius-sm);
+  padding:4px;margin-bottom:18px;
+}
+.step-btn{
+  flex:1;padding:10px 14px;text-align:center;
+  font-size:13px;font-weight:600;color:var(--muted);
+  border-radius:6px;transition:all .15s ease;
+}
+.step-btn.active{background:var(--paper);color:var(--ink);box-shadow:var(--shadow-sm)}
+.step-btn .step-num{
+  display:inline-block;width:20px;height:20px;line-height:20px;
+  text-align:center;background:var(--line);color:#fff;
+  border-radius:50%;font-size:11px;margin-right:6px;font-weight:700;
+}
+.step-btn.active .step-num{background:var(--ink)}
+
+/* =========================================================
+   模組 4：能力評量量表
+   ========================================================= */
+.scale-section{
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:22px;margin-bottom:18px;
+}
+.scale-section h4{
+  font-family:"Noto Serif TC",serif;font-weight:700;
+  font-size:18px;margin-bottom:6px;color:var(--ink);
+}
+.scale-section .scale-meta{
+  font-size:12px;color:var(--muted);margin-bottom:18px;
+  padding-bottom:14px;border-bottom:1px dashed var(--line);
+}
+.scale-meta .badge{
+  display:inline-block;background:var(--ink);color:var(--paper);
+  padding:2px 8px;border-radius:4px;font-size:10.5px;
+  font-weight:700;letter-spacing:1px;margin-right:8px;
+}
+
+.scale-item{
+  display:grid;grid-template-columns:1fr auto;gap:16px;
+  padding:14px 0;border-bottom:1px solid var(--line-soft);
+  align-items:center;
+}
+.scale-item:last-child{border-bottom:none}
+.scale-item-text{font-size:14px;line-height:1.6;color:var(--ink-2)}
+.scale-item-text .qnum{
+  font-family:"Noto Serif TC",serif;font-weight:700;color:var(--muted);
+  margin-right:8px;font-size:13px;
+}
+.likert{display:flex;gap:4px}
+.likert input[type="radio"]{display:none}
+.likert label{
+  width:32px;height:32px;border:1.5px solid var(--line);
+  border-radius:50%;display:grid;place-items:center;cursor:pointer;
+  font-size:12.5px;font-weight:600;color:var(--muted);
+  transition:all .15s ease;margin-bottom:0;
+}
+.likert label:hover{border-color:var(--ink-2);color:var(--ink)}
+.likert input[type="radio"]:checked + label{
+  background:var(--ink);color:var(--paper);border-color:var(--ink);
+}
+.likert-legend{
+  display:flex;justify-content:space-between;
+  font-size:11px;color:var(--muted);margin-top:6px;padding:0 4px;
+}
+
+/* 評量結果儀表板 */
+.result-summary{
+  background:linear-gradient(135deg, var(--ink) 0%, #2a3845 100%);
+  color:var(--paper);padding:30px;border-radius:var(--radius);
+  margin-bottom:18px;
+}
+.result-summary h3{
+  font-family:"Noto Serif TC",serif;font-weight:900;
+  font-size:24px;margin-bottom:6px;
+}
+.result-summary .eyebrow{
+  font-size:11px;letter-spacing:3px;color:rgba(251,247,238,.6);
+  text-transform:uppercase;
+}
+.result-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:22px;
+}
+.result-item{
+  border-left:2px solid rgba(251,247,238,.2);padding-left:14px;
+}
+.result-item .v{
+  font-family:"Noto Serif TC",serif;font-weight:900;font-size:28px;line-height:1;
+}
+.result-item .l{font-size:12px;color:rgba(251,247,238,.7);margin-top:4px}
+
+/* =========================================================
+   教師後台
+   ========================================================= */
+.teacher-toolbar{
+  display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;
+  padding:14px 18px;background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius-sm);align-items:center;
+}
+.teacher-toolbar .spacer{flex:1}
+
+.data-table{
+  width:100%;border-collapse:collapse;background:var(--paper);
+  border:1px solid var(--line);border-radius:var(--radius-sm);overflow:hidden;
+}
+.data-table th{
+  background:var(--paper-2);text-align:left;padding:12px 14px;
+  font-size:12px;letter-spacing:1px;font-weight:700;
+  color:var(--ink-2);text-transform:uppercase;
+  border-bottom:1.5px solid var(--ink);
+}
+.data-table td{
+  padding:12px 14px;font-size:13.5px;
+  border-bottom:1px solid var(--line-soft);
+}
+.data-table tr:last-child td{border-bottom:none}
+.data-table tr:hover td{background:var(--paper-2)}
+
+.empty-state{
+  text-align:center;padding:60px 20px;color:var(--muted);
+  background:var(--paper);border:1.5px dashed var(--line);
+  border-radius:var(--radius);
+}
+.empty-state .icon{font-size:40px;margin-bottom:10px;opacity:.4}
+.empty-state h4{font-family:"Noto Serif TC",serif;margin-bottom:6px;color:var(--ink-2)}
+
+.chart-wrap{
+  background:var(--paper);border:1px solid var(--line);
+  border-radius:var(--radius);padding:22px;margin-bottom:18px;
+}
+.chart-wrap h4{
+  font-family:"Noto Serif TC",serif;font-weight:700;font-size:17px;
+  margin-bottom:14px;
+}
+
+/* Toast */
+.toast{
+  position:fixed;bottom:30px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);
+  padding:12px 20px;border-radius:8px;font-size:14px;
+  box-shadow:var(--shadow);opacity:0;pointer-events:none;
+  transition:opacity .2s, transform .2s;z-index:100;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-6px)}
+
+/* Footer */
+footer{
+  border-top:1px solid var(--line);background:var(--paper);
+  padding:30px 0;margin-top:50px;
+}
+footer .wrap{
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:14px;
+}
+footer .cite{
+  font-size:12px;color:var(--muted);line-height:1.7;max-width:680px;
+  font-family:"Noto Serif TC",serif;
+}
+footer .github{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12.5px;font-weight:600;color:var(--ink);
+  padding:6px 12px;border:1px solid var(--line);border-radius:6px;
+}
+footer .github:hover{background:var(--ink);color:var(--paper)}
+
+/* Responsive */
+@media (max-width:900px){
+  .hero{padding:30px 24px}
+  .hero h1{font-size:32px}
+  .section-head h2{font-size:26px}
+  .theory-grid, .phases, .stats, .result-grid{grid-template-columns:1fr 1fr}
+  .nav{display:none}
+  .topbar-inner{padding:10px 0}
+}
+@media (max-width:600px){
+  .theory-grid, .phases, .stats, .result-grid{grid-template-columns:1fr}
+  .scale-item{grid-template-columns:1fr}
+  .likert{justify-content:flex-start}
+}
+
+/* 列印樣式 */
+@media print{
+  .topbar, .teacher-toolbar, footer, .nav-btn{display:none !important}
+  body{background:#fff;color:#000}
+  .section{display:block !important}
+  .card, .hero{box-shadow:none;border-color:#000}
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================================================
+     頂部：品牌 + 導覽
+============================================================ -->
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <div class="brand-mark">先</div>
+      <div class="brand-text">
+        <h1>AI 賦能運算思維教學平台</h1>
+        <div class="sub">Think-Then-Verify · CT & 4C</div>
+      </div>
+    </div>
+    <nav class="nav" id="mainNav">
+      <button class="nav-btn active" data-target="home"><span class="nav-num">00</span>首頁</button>
+      <button class="nav-btn" data-target="mind"><span class="nav-num">01</span>心智圖→IPO</button>
+      <button class="nav-btn" data-target="ai"><span class="nav-num">02</span>AI 驗證</button>
+      <button class="nav-btn" data-target="reflect"><span class="nav-num">03</span>影音腳本</button>
+      <button class="nav-btn" data-target="assess"><span class="nav-num">04</span>能力評量</button>
+      <div class="role-switch">
+        <button class="role-btn active" data-role="student">學生</button>
+        <button class="role-btn" data-role="teacher">教師</button>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main>
+<div class="wrap">
+
+<!-- ============================================================
+     SECTION 0 ─ 首頁（理論框架 + 四階段）
+============================================================ -->
+<section class="section active" id="section-home">
+
+  <div class="hero">
+    <span class="hero-eyebrow">A pedagogy for human–AI collaboration</span>
+    <h1 class="serif">先思考，<br>後驗證。</h1>
+    <p class="lead">
+      本平台以郭博仁（2026）大樣本準實驗研究為基礎，將「先思考、後驗證」（Think-Then-Verify）教學模式操作化為四階段教學流程。AI 不是替代學生推理的捷徑，而是<strong>認知增強之夥伴</strong>──學生先產出問題分解與解題取徑，AI 才進行驗證、精煉與多元視角啟發。
+    </p>
+    <div class="meta">
+      <div><strong>N = 200</strong>　準實驗對照</div>
+      <div><strong>運算思維 d = 0.86</strong>　（對照組之 3.2 倍）</div>
+      <div><strong>4C 素養 d = 0.72</strong>　（對照組之 4.0 倍）</div>
+      <div><strong>自我效能 β = 0.21</strong>　p &lt; .001</div>
+    </div>
+  </div>
+
+  <div class="theory-grid">
+    <div class="theory-card">
+      <span class="num serif">01</span>
+      <h4>建構主義學習論</h4>
+      <p>學習者透過與真實問題之主動互動建構知識。AI 定位為鷹架夥伴而非解答權威，認知責任仍歸屬學習者。</p>
+      <div class="cite">Piaget (1954); Vygotsky (1978)</div>
+    </div>
+    <div class="theory-card">
+      <span class="num serif">02</span>
+      <h4>認知負荷理論</h4>
+      <p>IPO 框架降低外在認知負荷，將複雜結構不良問題拆解為可掌握之子問題；AI 驗證進一步降低認知搜尋需求。</p>
+      <div class="cite">Sweller (1988); Sweller et al. (2011)</div>
+    </div>
+    <div class="theory-card">
+      <span class="num serif">03</span>
+      <h4>自我效能與自決理論</h4>
+      <p>高自我效能學生獲得最大效果量（d = 1.24）。本框架同時回應自主性、勝任感與關聯性三項心理需求。</p>
+      <div class="cite">Bandura (1997); Deci & Ryan (2000)</div>
+    </div>
+  </div>
+
+  <h3 class="phases-title serif">四階段教學流程</h3>
+  <div class="phases">
+    <div class="phase" data-phase="1" data-go="mind">
+      <span class="ph-tag">PHASE 01</span>
+      <h4>問題定義與分解</h4>
+      <p>運用 IPO 框架與心智圖，將問題拆解為輸入條件、處理邏輯與輸出效益三大支柱。</p>
+      <span class="ph-go">進入模組 →</span>
+    </div>
+    <div class="phase" data-phase="2" data-go="ai">
+      <span class="ph-tag">PHASE 02</span>
+      <h4>AI 賦能翻譯與除錯</h4>
+      <p>學生先完成 IPO 後，由 AI 產生程式碼框架；學生負責驗證、邏輯精煉與除錯。</p>
+      <span class="ph-go">進入模組 →</span>
+    </div>
+    <div class="phase" data-phase="3" data-go="reflect">
+      <span class="ph-tag">PHASE 03</span>
+      <h4>多媒體專案開發</h4>
+      <p>將程式設計專案轉化為情境化影音腳本，整合創意與情境推理。</p>
+      <span class="ph-go">進入模組 →</span>
+    </div>
+    <div class="phase" data-phase="4" data-go="assess">
+      <span class="ph-tag">PHASE 04</span>
+      <h4>反思評量與學習遷移</h4>
+      <p>運算思維能力量表（16 題）與 4C 素養問卷（12 題），檢驗能力遷移至新情境之程度。</p>
+      <span class="ph-go">進入模組 →</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="num serif">70<small>%</small></div><div class="lbl">學生推理時間</div></div>
+    <div class="stat"><div class="num serif">30<small>%</small></div><div class="lbl">AI 驗證時間</div></div>
+    <div class="stat"><div class="num serif">91.5<small>%</small></div><div class="lbl">學生反思回應率</div></div>
+    <div class="stat"><div class="num serif">α = .89</div><div class="lbl">量表信度</div></div>
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     SECTION 1 ─ 心智圖 → IPO
+============================================================ -->
+<section class="section" id="section-mind">
+
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">PHASE 01 ─ DECOMPOSE</div>
+      <h2 class="serif">心智圖 → IPO 分解</h2>
+    </div>
+    <p class="desc">問題分解（problem decomposition）是運算思維之首要能力。請<strong>先自主思考</strong>，將你的問題拆解為三條心智圖分支：輸入條件、處理邏輯、輸出效益。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="badge" style="background:var(--c-p1)">範例</span>
+      快速範例（點選載入）
+    </div>
+    <div class="example-pills">
+      <button class="pill" data-ex="agri">智慧農業：人機協作效能</button>
+      <button class="pill" data-ex="iot">IoT 環境監測系統</button>
+      <button class="pill" data-ex="cyber">企業網路異常偵測</button>
+      <button class="pill" data-ex="edu">學習成效預測模型</button>
+      <button class="pill" data-ex="clear" style="background:var(--paper-2);color:var(--muted)">↺ 清除</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="badge" style="background:var(--ink)">輸入</span>
+      心智圖三分支
+    </div>
+    <div class="mind-grid">
+      <div class="branch" data-type="input">
+        <div class="branch-head">
+          <div class="branch-icon">📥</div>
+          <span>INPUT｜輸入條件</span>
+        </div>
+        <label>有哪些原始資料或前置條件？</label>
+        <textarea id="branch-input" placeholder="例：土壤濕度感測器資料、氣象站歷史資料、作物品種參數..."></textarea>
+      </div>
+      <div class="branch" data-type="process">
+        <div class="branch-head">
+          <div class="branch-icon">⚙️</div>
+          <span>PROCESS｜處理邏輯</span>
+        </div>
+        <label>需要哪些演算法或處理步驟？</label>
+        <textarea id="branch-process" placeholder="例：資料清洗、特徵工程、迴歸建模、人機協作決策..."></textarea>
+      </div>
+      <div class="branch" data-type="output">
+        <div class="branch-head">
+          <div class="branch-icon">📊</div>
+          <span>OUTPUT｜輸出效益</span>
+        </div>
+        <label>產出什麼結果？解決什麼問題？</label>
+        <textarea id="branch-output" placeholder="例：澆灌建議報告、節水百分比預測、決策可信度評估..."></textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap">
+      <button class="btn btn-accent" onclick="convertMindToIpo()">🔄 轉換為 IPO 結構</button>
+      <button class="btn btn-secondary" onclick="saveMindMap()">💾 儲存草稿</button>
+      <button class="btn btn-ghost" onclick="goTo('ai')">下一步：AI 驗證 →</button>
+    </div>
+  </div>
+
+  <div id="ipo-result-card" style="display:none">
+    <div class="card">
+      <div class="card-title">
+        <span class="badge" style="background:var(--c-p2)">輸出</span>
+        IPO 結構化結果（可作為 AI 驗證之輸入）
+      </div>
+      <div class="ipo-result" id="ipo-result">
+        <!-- generated -->
+      </div>
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="copyIpoText()">📋 複製 IPO 文字</button>
+        <button class="btn" onclick="sendIpoToAI()">→ 帶入 AI 驗證模組</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     SECTION 2 ─ AI 賦能驗證 / 程式碼生成
+============================================================ -->
+<section class="section" id="section-ai">
+
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">PHASE 02 ─ VERIFY</div>
+      <h2 class="serif">AI 賦能翻譯與除錯</h2>
+    </div>
+    <p class="desc">請務必<strong>先完成 IPO 分解</strong>再進入本模組。本模組以離線模擬方式展示 AI 如何根據結構化輸入產生程式碼框架，學生負責驗證邏輯、評估解法品質。</p>
+  </div>
+
+  <div class="steps">
+    <button class="step-btn active" data-step="1"><span class="step-num">1</span>輸入 IPO</button>
+    <button class="step-btn" data-step="2"><span class="step-num">2</span>AI 生成</button>
+    <button class="step-btn" data-step="3"><span class="step-num">3</span>學生驗證</button>
+  </div>
+
+  <div class="card" id="step1-pane">
+    <div class="card-title">
+      <span class="badge" style="background:var(--c-p2)">步驟 1</span>
+      確認你的 IPO 結構
+    </div>
+    <label>問題描述（一句話摘要）</label>
+    <input type="text" id="problem-desc" placeholder="例：建立一個能根據環境感測資料預測最佳澆灌時機的決策支援系統">
+
+    <div style="margin-top:14px">
+      <label>INPUT（從心智圖帶入）</label>
+      <textarea id="ai-input" rows="3"></textarea>
+    </div>
+    <div style="margin-top:14px">
+      <label>PROCESS（從心智圖帶入）</label>
+      <textarea id="ai-process" rows="3"></textarea>
+    </div>
+    <div style="margin-top:14px">
+      <label>OUTPUT（從心智圖帶入）</label>
+      <textarea id="ai-output" rows="3"></textarea>
+    </div>
+
+    <label style="margin-top:14px">程式語言</label>
+    <select id="ai-lang" style="max-width:240px">
+      <option value="python">Python（推薦）</option>
+      <option value="javascript">JavaScript</option>
+      <option value="java">Java</option>
+    </select>
+
+    <div style="margin-top:18px">
+      <button class="btn btn-accent" onclick="generateCode()">🤖 模擬 AI 生成程式碼框架</button>
+      <span class="field-help" style="margin-left:12px">本模組為離線示範模式，模擬論文中 Grok + DeepSeek 雙核心架構之輸出格式。</span>
+    </div>
+  </div>
+
+  <div class="card" id="step2-pane" style="display:none">
+    <div class="card-title">
+      <span class="badge" style="background:var(--c-p2)">步驟 2</span>
+      AI 生成之程式碼框架
+    </div>
+    <div class="code-pane" id="generated-code">
+<span class="com"># 等待生成...</span>
+    </div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="copyCode()">📋 複製程式碼</button>
+      <button class="btn btn-ghost" onclick="downloadCode()">⬇ 下載 .py</button>
+      <button class="btn" onclick="goStep(3)">下一步：學生驗證 →</button>
+    </div>
+  </div>
+
+  <div class="card" id="step3-pane" style="display:none">
+    <div class="card-title">
+      <span class="badge" style="background:var(--c-p2)">步驟 3</span>
+      學生驗證與反思（先思考·後驗證之核心）
+    </div>
+    <p style="color:var(--muted);font-size:13.5px;margin-bottom:14px">
+      請針對 AI 生成之程式碼，逐項回答以下檢核問題。這是「先思考、後驗證」最關鍵的階段──你才是最終判斷者。
+    </p>
+
+    <label>1. AI 生成之邏輯是否完整對應你的 IPO 設計？哪些部分需要修改？</label>
+    <textarea id="verify-1" rows="3" placeholder="例：INPUT 部分缺少資料清洗步驟，需補上 dropna()..."></textarea>
+
+    <label style="margin-top:14px">2. 你發現了哪些潛在的程式錯誤或邏輯漏洞？</label>
+    <textarea id="verify-2" rows="3" placeholder="例：當感測器回傳負值時未處理；邊界條件未檢查..."></textarea>
+
+    <label style="margin-top:14px">3. 是否有比 AI 提供更優雅或更高效的解法？</label>
+    <textarea id="verify-3" rows="3" placeholder="例：可改用向量化運算取代迴圈，效能提升..."></textarea>
+
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-accent" onclick="saveVerification()">✅ 提交驗證紀錄</button>
+      <button class="btn btn-ghost" onclick="goTo('reflect')">下一步：影音腳本 →</button>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     SECTION 3 ─ 影音腳本（多媒體專案）
+============================================================ -->
+<section class="section" id="section-reflect">
+
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">PHASE 03 ─ COMMUNICATE</div>
+      <h2 class="serif">影音教學腳本</h2>
+    </div>
+    <p class="desc">將你的程式設計專案轉化為情境化影音腳本──這是論文中促進 4C 素養（特別是溝通與創造力）之關鍵階段。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="badge" style="background:var(--c-p3)">腳本</span>
+      三幕式教學影片腳本
+    </div>
+
+    <label>影片標題</label>
+    <input type="text" id="script-title" placeholder="例：用 30 秒理解人機協作如何提升智慧農業效率">
+
+    <label style="margin-top:14px">第一幕：問題情境（建議 15 秒）</label>
+    <textarea id="script-act1" rows="3" placeholder="開場 hook：你知道台灣農業每年因錯誤澆灌損失多少水資源嗎？..."></textarea>
+
+    <label style="margin-top:14px">第二幕：解法呈現（建議 30 秒）</label>
+    <textarea id="script-act2" rows="4" placeholder="演示 IPO 流程 → AI 程式碼 → 實際運作畫面..."></textarea>
+
+    <label style="margin-top:14px">第三幕：學習啟示（建議 15 秒）</label>
+    <textarea id="script-act3" rows="3" placeholder="收束 CTA：這就是「先思考、後驗證」的力量..."></textarea>
+
+    <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-accent" onclick="saveScript()">💾 儲存腳本</button>
+      <button class="btn btn-secondary" onclick="exportScript()">📄 匯出 Markdown</button>
+      <button class="btn btn-ghost" onclick="goTo('assess')">下一步：能力評量 →</button>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     SECTION 4 ─ 能力評量（CT 16 題 + 4C 12 題）
+============================================================ -->
+<section class="section" id="section-assess">
+
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">PHASE 04 ─ MEASURE</div>
+      <h2 class="serif">運算思維與 4C 素養自評</h2>
+    </div>
+    <p class="desc">本量表完整採用郭博仁（2026）研究之測量工具。共 28 題，5 點 Likert，預計 5 分鐘完成。所有資料保存於本地端瀏覽器。</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span class="badge" style="background:var(--c-p4)">基本資料</span>
+      作答資訊
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px">
+      <div>
+        <label>學號 / 識別碼</label>
+        <input type="text" id="stu-id" placeholder="例：S2026001">
+      </div>
+      <div>
+        <label>姓名（可匿名）</label>
+        <input type="text" id="stu-name" placeholder="可填代號">
+      </div>
+      <div>
+        <label>測量階段</label>
+        <select id="stu-phase">
+          <option value="pre">前測（介入前）</option>
+          <option value="post">後測（介入後）</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- 量表會以 JS 動態渲染 -->
+  <div id="scale-container"></div>
+
+  <div class="card" style="text-align:center;background:var(--paper-2)">
+    <button class="btn btn-accent" style="padding:14px 32px;font-size:15px" onclick="submitAssessment()">
+      📊 計算分數並提交
+    </button>
+    <p class="field-help" style="margin-top:10px">提交後會在下方產生個人化儀表板與分數報告</p>
+  </div>
+
+  <div id="result-pane" style="display:none">
+    <div class="result-summary">
+      <div class="eyebrow">YOUR RESULT · 評量結果</div>
+      <h3 class="serif">能力分數報告</h3>
+      <p style="opacity:.8;font-size:13.5px;margin-top:6px" id="result-meta"></p>
+      <div class="result-grid" id="result-grid"></div>
+    </div>
+    <div class="chart-wrap">
+      <h4>能力雷達圖</h4>
+      <canvas id="radarChart" height="280"></canvas>
+    </div>
+    <div class="card">
+      <div class="card-title">📝 元認知反思</div>
+      <p style="color:var(--muted);font-size:13.5px;margin-bottom:14px">論文質性研究階段亦採此反思題，91.5% 學生回應後，主題分析證實「AI 應作為輔助工具而非捷徑」之共識。</p>
+      <label>1. 你認為 AI 在本次學習中扮演何種角色？</label>
+      <textarea id="reflect-1" rows="3"></textarea>
+      <label style="margin-top:14px">2. 你對「過度依賴 AI」是否有任何疑慮？</label>
+      <textarea id="reflect-2" rows="3"></textarea>
+      <label style="margin-top:14px">3. 本次學習對你未來學習的啟示？</label>
+      <textarea id="reflect-3" rows="3"></textarea>
+
+      <div style="margin-top:18px">
+        <button class="btn btn-accent" onclick="saveReflection()">💾 儲存反思紀錄</button>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+
+<!-- ============================================================
+     SECTION 5 ─ 教師後台
+============================================================ -->
+<section class="section" id="section-teacher">
+
+  <div class="section-head">
+    <div>
+      <div class="eyebrow">TEACHER · DASHBOARD</div>
+      <h2 class="serif">教師評量後臺</h2>
+    </div>
+    <p class="desc">檢視所有學生提交之評量資料、計算群體統計、匯出 CSV 進行後續分析（如配對樣本 t 檢定、ANCOVA）。</p>
+  </div>
+
+  <div class="teacher-toolbar">
+    <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📊 匯出 CSV</button>
+    <button class="btn btn-secondary btn-sm" onclick="exportJSON()">💾 匯出 JSON</button>
+    <button class="btn btn-ghost btn-sm" onclick="loadDemoData()">🎲 載入示範資料</button>
+    <div class="spacer"></div>
+    <button class="btn btn-ghost btn-sm" onclick="clearAllData()" style="color:var(--accent);border-color:var(--accent)">🗑 清空全部資料</button>
+  </div>
+
+  <div class="chart-wrap">
+    <h4>群體統計概覽</h4>
+    <div id="teacher-stats" class="result-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:18px"></div>
+  </div>
+
+  <div class="chart-wrap">
+    <h4>前後測比較（運算思維 vs 4C 素養）</h4>
+    <canvas id="compareChart" height="200"></canvas>
+  </div>
+
+  <div class="chart-wrap">
+    <h4>所有提交紀錄</h4>
+    <div id="records-container"></div>
+  </div>
+
+</section>
+
+
+</div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="cite">
+      <strong>引用：</strong>郭博仁（2026）。整合「先思考、後驗證」教學模式之 AI 賦能運算思維教學成效：大樣本準實驗研究。<br>
+      Kuo, P.-J. (2026). The Effectiveness of AI-Empowered Computational Thinking Instruction Integrated with a Think-Then-Verify Pedagogical Model.
+    </div>
+    <a class="github" href="https://github.com" target="_blank">⌘ View on GitHub</a>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JavaScript：整合邏輯
+============================================================ -->
+<script>
+/* =========================================================
+   工具函式
+   ========================================================= */
+const $ = (q) => document.querySelector(q);
+const $$ = (q) => document.querySelectorAll(q);
+const STORE_KEY = 'aict_v1';
+
+function toast(msg, ms=2200){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._tm);
+  t._tm = setTimeout(()=>t.classList.remove('show'), ms);
+}
+
+function getStore(){
+  try{ return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); }
+  catch(e){ return {}; }
+}
+function setStore(d){ localStorage.setItem(STORE_KEY, JSON.stringify(d)); }
+
+function getRecords(){ return getStore().records || []; }
+function saveRecord(rec){
+  const d = getStore();
+  if(!d.records) d.records = [];
+  d.records.push(rec);
+  setStore(d);
+}
+
+/* =========================================================
+   導覽切換
+   ========================================================= */
+function goTo(target){
+  $$('.section').forEach(s => s.classList.remove('active'));
+  $$('.nav-btn').forEach(b => b.classList.remove('active'));
+  $('#section-'+target).classList.add('active');
+  const nav = document.querySelector(`.nav-btn[data-target="${target}"]`);
+  if(nav) nav.classList.add('active');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+$$('.nav-btn').forEach(b => {
+  b.addEventListener('click', () => goTo(b.dataset.target));
+});
+
+$$('.phase').forEach(p => {
+  p.addEventListener('click', () => goTo(p.dataset.go));
+});
+
+/* 學生 / 教師切換 */
+$$('.role-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    $$('.role-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    if(b.dataset.role === 'teacher'){
+      // 隱藏學生 nav，顯示教師後台
+      $$('.nav-btn').forEach(n => n.style.display='none');
+      goTo('teacher');
+      renderTeacherDashboard();
+    } else {
+      $$('.nav-btn').forEach(n => n.style.display='');
+      goTo('home');
+    }
+  });
+});
+
+/* =========================================================
+   範例庫
+   ========================================================= */
+const EXAMPLES = {
+  agri: {
+    input: '土壤濕度感測器資料\n氣象站歷史 5 年資料（溫度、降雨、日照）\n作物品種參數（耐旱性、生長週期）\n農民人工觀察紀錄',
+    process: '感測器資料清洗與異常值剔除\n特徵工程：滯後變數、移動平均\n多元迴歸 / 隨機森林建模\n人機協作決策權重調整\n模擬：人類經驗 vs 純 AI 預測',
+    output: '最佳澆灌時機建議報告\n節水百分比預測（含信賴區間）\n決策可信度評估指標\n人機協作績效視覺化儀表板'
+  },
+  iot: {
+    input: 'ESP32 / Raspberry Pi 感測節點資料\nMQTT broker 即時訊息流\n環境參數：溫濕度、PM2.5、CO2\n時間戳與裝置 ID',
+    process: '即時資料串流接收\nKafka / InfluxDB 資料管線\n異常偵測（Z-score / IsolationForest）\n告警規則引擎',
+    output: '即時環境監測儀表板\n異常事件告警通知\n歷史趨勢分析圖表\n裝置健康度評分'
+  },
+  cyber: {
+    input: '網路流量封包紀錄（NetFlow / sFlow）\n防火牆 / IDS 日誌\n使用者行為基線資料\n威脅情報資料庫',
+    process: '日誌正規化與時間對齊\n機器學習異常分類\n關聯規則挖掘（Apriori）\n威脅評分演算法',
+    output: '即時威脅告警面板\n攻擊向量分析報告\n使用者風險評分\n資安事件回應建議'
+  },
+  edu: {
+    input: '學生課堂表現資料\n作業繳交紀錄與分數\n互動歷程（點擊流、停留時間）\n前測量表分數',
+    process: '特徵工程：學習行為指標\n分類模型：高/低風險學生\n預測模型：期末成績\n群集分析：學習者類型',
+    output: '學習風險預警系統\n個人化學習建議\n教師干預時機提示\n班級學習成效報告'
+  }
+};
+
+$$('.pill[data-ex]').forEach(p => {
+  p.addEventListener('click', () => {
+    const key = p.dataset.ex;
+    if(key === 'clear'){
+      $('#branch-input').value = '';
+      $('#branch-process').value = '';
+      $('#branch-output').value = '';
+      $('#ipo-result-card').style.display = 'none';
+      toast('已清除');
+      return;
+    }
+    const ex = EXAMPLES[key];
+    if(!ex) return;
+    $('#branch-input').value = ex.input;
+    $('#branch-process').value = ex.process;
+    $('#branch-output').value = ex.output;
+    toast('範例已載入');
+  });
+});
+
+/* =========================================================
+   心智圖 → IPO 轉換
+   ========================================================= */
+function convertMindToIpo(){
+  const inp = $('#branch-input').value.trim();
+  const prc = $('#branch-process').value.trim();
+  const out = $('#branch-output').value.trim();
+
+  if(!inp || !prc || !out){
+    toast('請完成三個分支再進行轉換');
+    return;
+  }
+
+  const splitItems = (s) => s.split(/\n+/).map(x => x.trim()).filter(Boolean);
+  const inputItems = splitItems(inp);
+  const processItems = splitItems(prc);
+  const outputItems = splitItems(out);
+
+  const html = `
+    <div class="ipo-block" data-type="input">
+      <h5>📥 INPUT</h5>
+      <ul>${inputItems.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+    </div>
+    <div class="ipo-block" data-type="process">
+      <h5>⚙️ PROCESS</h5>
+      <ul>${processItems.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+    </div>
+    <div class="ipo-block" data-type="output">
+      <h5>📊 OUTPUT</h5>
+      <ul>${outputItems.map(x => `<li>${escapeHtml(x)}</li>`).join('')}</ul>
+    </div>
+  `;
+  $('#ipo-result').innerHTML = html;
+  $('#ipo-result-card').style.display = '';
+  $('#ipo-result-card').scrollIntoView({behavior:'smooth', block:'start'});
+  toast('已產生 IPO 結構');
+}
+
+function escapeHtml(s){
+  return s.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+}
+
+function saveMindMap(){
+  const data = {
+    input: $('#branch-input').value,
+    process: $('#branch-process').value,
+    output: $('#branch-output').value,
+    ts: Date.now()
+  };
+  const d = getStore();
+  d.mindmap = data;
+  setStore(d);
+  toast('草稿已儲存於本地');
+}
+
+function copyIpoText(){
+  const text = `# IPO 結構化分析\n\n## 📥 INPUT\n${$('#branch-input').value}\n\n## ⚙️ PROCESS\n${$('#branch-process').value}\n\n## 📊 OUTPUT\n${$('#branch-output').value}`;
+  navigator.clipboard.writeText(text).then(() => toast('已複製至剪貼簿'));
+}
+
+function sendIpoToAI(){
+  $('#ai-input').value = $('#branch-input').value;
+  $('#ai-process').value = $('#branch-process').value;
+  $('#ai-output').value = $('#branch-output').value;
+  goTo('ai');
+  toast('IPO 已帶入 AI 驗證模組');
+}
+
+/* =========================================================
+   AI 程式碼生成（離線模擬）
+   ========================================================= */
+$$('.step-btn').forEach(b => {
+  b.addEventListener('click', () => goStep(parseInt(b.dataset.step)));
+});
+
+function goStep(n){
+  $$('.step-btn').forEach(b => b.classList.toggle('active', parseInt(b.dataset.step) === n));
+  ['step1-pane','step2-pane','step3-pane'].forEach((id, i) => {
+    $('#'+id).style.display = (i+1 === n) ? '' : 'none';
+  });
+}
+
+function generateCode(){
+  const desc = $('#problem-desc').value || '請輸入問題描述';
+  const inp = $('#ai-input').value.trim();
+  const prc = $('#ai-process').value.trim();
+  const out = $('#ai-output').value.trim();
+  const lang = $('#ai-lang').value;
+
+  if(!inp || !prc || !out){
+    toast('請先完成 IPO 三段內容');
+    return;
+  }
+
+  const splitLines = (s) => s.split(/\n+/).map(x => x.trim()).filter(Boolean);
+  const inputs = splitLines(inp);
+  const processes = splitLines(prc);
+  const outputs = splitLines(out);
+
+  let code = '';
+  if(lang === 'python'){
+    code = generatePython(desc, inputs, processes, outputs);
+  } else if(lang === 'javascript'){
+    code = generateJS(desc, inputs, processes, outputs);
+  } else {
+    code = generateJava(desc, inputs, processes, outputs);
+  }
+
+  $('#generated-code').innerHTML = highlightCode(code, lang);
+  goStep(2);
+  toast('AI 已生成程式碼框架，請逐項驗證');
+}
+
+function generatePython(desc, inputs, processes, outputs){
+  const cls = '"""\n' + desc + '\n\n本程式碼由 AI 根據 IPO 結構自動生成框架。\n請依「先思考、後驗證」原則：學生負責驗證邏輯、補完細節、調整參數。\n"""\n\nimport pandas as pd\nimport numpy as np\nfrom dataclasses import dataclass\nfrom typing import List, Dict, Any\n\n\n# ============================================================\n# 📥 INPUT 模組：輸入條件與資料載入\n# ============================================================\n@dataclass\nclass InputConfig:\n    """輸入參數配置"""\n' +
+    inputs.map((x, i) => `    field_${i+1}: Any  # ${x}`).join('\n') +
+    '\n\ndef load_input_data(config: InputConfig) -> pd.DataFrame:\n    """\n    載入並驗證輸入資料\n    TODO: 學生需驗證資料完整性與型別\n    """\n    # 1. 讀取資料來源\n    # 2. 檢查缺失值\n    # 3. 型別轉換\n    raise NotImplementedError("請學生實作資料載入邏輯")\n\n\n# ============================================================\n# ⚙️ PROCESS 模組：核心處理邏輯\n# ============================================================\n' +
+    processes.map((x, i) => `def process_step_${i+1}(data: pd.DataFrame) -> pd.DataFrame:\n    """${x}"""\n    # TODO: 學生實作此處理步驟\n    return data\n`).join('\n') +
+    '\n\ndef run_pipeline(data: pd.DataFrame) -> pd.DataFrame:\n    """執行完整處理管線"""\n' +
+    processes.map((x, i) => `    data = process_step_${i+1}(data)`).join('\n') +
+    '\n    return data\n\n\n# ============================================================\n# 📊 OUTPUT 模組：結果產出與展示\n# ============================================================\n' +
+    outputs.map((x, i) => `def generate_output_${i+1}(result: pd.DataFrame) -> Dict:\n    """${x}"""\n    return {"status": "TODO", "data": None}\n`).join('\n') +
+    '\n\n# ============================================================\n# 🚀 主程式入口\n# ============================================================\nif __name__ == "__main__":\n    # 步驟 1：載入輸入\n    config = InputConfig(\n        ' + inputs.map((x, i) => `field_${i+1}=None  # ${x}`).join(',\n        ') + '\n    )\n    raw_data = load_input_data(config)\n\n    # 步驟 2：執行處理管線\n    processed = run_pipeline(raw_data)\n\n    # 步驟 3：產出結果\n' +
+    outputs.map((x, i) => `    output_${i+1} = generate_output_${i+1}(processed)`).join('\n') +
+    '\n\n    print("✓ Pipeline completed")\n';
+  return cls;
+}
+
+function generateJS(desc, inputs, processes, outputs){
+  return `/**\n * ${desc}\n * AI 生成框架 - 請學生驗證並補完邏輯\n */\n\n// 📥 INPUT\nclass InputConfig {\n  constructor() {\n${inputs.map((x,i)=>`    this.field${i+1} = null; // ${x}`).join('\n')}\n  }\n}\n\nasync function loadInputData(config) {\n  // TODO: 學生實作\n  throw new Error('Not implemented');\n}\n\n// ⚙️ PROCESS\n${processes.map((x,i)=>`async function processStep${i+1}(data) {\n  // ${x}\n  return data;\n}`).join('\n\n')}\n\nasync function runPipeline(data) {\n${processes.map((x,i)=>`  data = await processStep${i+1}(data);`).join('\n')}\n  return data;\n}\n\n// 📊 OUTPUT\n${outputs.map((x,i)=>`function generateOutput${i+1}(result) {\n  // ${x}\n  return { status: 'TODO' };\n}`).join('\n\n')}\n\n// 🚀 Main\n(async () => {\n  const config = new InputConfig();\n  const raw = await loadInputData(config);\n  const processed = await runPipeline(raw);\n${outputs.map((x,i)=>`  const out${i+1} = generateOutput${i+1}(processed);`).join('\n')}\n  console.log('✓ Pipeline completed');\n})();\n`;
+}
+
+function generateJava(desc, inputs, processes, outputs){
+  return `/**\n * ${desc}\n * AI 生成框架 - 請學生驗證並補完邏輯\n */\nimport java.util.*;\n\npublic class Pipeline {\n\n    // 📥 INPUT\n    static class InputConfig {\n${inputs.map((x,i)=>`        Object field${i+1}; // ${x}`).join('\n')}\n    }\n\n    static List<Map<String,Object>> loadInputData(InputConfig config) {\n        // TODO: 學生實作\n        throw new UnsupportedOperationException();\n    }\n\n    // ⚙️ PROCESS\n${processes.map((x,i)=>`    static List<Map<String,Object>> processStep${i+1}(List<Map<String,Object>> data) {\n        // ${x}\n        return data;\n    }`).join('\n\n')}\n\n    // 📊 OUTPUT\n${outputs.map((x,i)=>`    static Map<String,Object> generateOutput${i+1}(List<Map<String,Object>> data) {\n        // ${x}\n        return new HashMap<>();\n    }`).join('\n\n')}\n\n    public static void main(String[] args) {\n        InputConfig config = new InputConfig();\n        var raw = loadInputData(config);\n        var processed = raw;\n${processes.map((x,i)=>`        processed = processStep${i+1}(processed);`).join('\n')}\n${outputs.map((x,i)=>`        var out${i+1} = generateOutput${i+1}(processed);`).join('\n')}\n        System.out.println("✓ Pipeline completed");\n    }\n}\n`;
+}
+
+function highlightCode(code, lang){
+  // 簡易語法高亮
+  let s = escapeHtml(code);
+  if(lang === 'python'){
+    s = s.replace(/\b(import|from|def|class|if|else|elif|return|raise|with|as|try|except|for|in|while|pass|None|True|False|self)\b/g, '<span class="kw">$1</span>');
+  } else if(lang === 'javascript'){
+    s = s.replace(/\b(const|let|var|function|class|async|await|new|if|else|return|throw|try|catch|for|in|of|while|null|true|false|this|console)\b/g, '<span class="kw">$1</span>');
+  } else {
+    s = s.replace(/\b(public|static|class|void|int|String|new|if|else|return|throw|try|catch|for|while|null|true|false|this|Object|Map|List|var|import)\b/g, '<span class="kw">$1</span>');
+  }
+  s = s.replace(/(#|\/\/)([^\n]*)/g, '<span class="com">$1$2</span>');
+  s = s.replace(/("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*')/g, '<span class="str">$1</span>');
+  return s;
+}
+
+function copyCode(){
+  const text = $('#generated-code').textContent;
+  navigator.clipboard.writeText(text).then(() => toast('程式碼已複製'));
+}
+
+function downloadCode(){
+  const lang = $('#ai-lang').value;
+  const ext = lang === 'python' ? 'py' : lang === 'javascript' ? 'js' : 'java';
+  const blob = new Blob([$('#generated-code').textContent], {type:'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `ai_generated.${ext}`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('已下載');
+}
+
+function saveVerification(){
+  const data = {
+    type: 'verification',
+    problem: $('#problem-desc').value,
+    v1: $('#verify-1').value,
+    v2: $('#verify-2').value,
+    v3: $('#verify-3').value,
+    ts: Date.now()
+  };
+  const d = getStore();
+  d.verification = data;
+  setStore(d);
+  toast('驗證紀錄已儲存');
+}
+
+/* =========================================================
+   影音腳本
+   ========================================================= */
+function saveScript(){
+  const data = {
+    title: $('#script-title').value,
+    act1: $('#script-act1').value,
+    act2: $('#script-act2').value,
+    act3: $('#script-act3').value,
+    ts: Date.now()
+  };
+  const d = getStore();
+  d.script = data;
+  setStore(d);
+  toast('腳本已儲存');
+}
+
+function exportScript(){
+  const t = $('#script-title').value || '教學影片腳本';
+  const md = `# ${t}\n\n## 第一幕：問題情境（15s）\n${$('#script-act1').value}\n\n## 第二幕：解法呈現（30s）\n${$('#script-act2').value}\n\n## 第三幕：學習啟示（15s）\n${$('#script-act3').value}\n`;
+  const blob = new Blob([md], {type:'text/markdown'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${t.replace(/\s+/g,'_')}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* =========================================================
+   能力評量量表（CT 16 題 + 4C 12 題，來自論文）
+   ========================================================= */
+const CT_SCALE = {
+  title: '運算思維能力量表',
+  alpha: '.892–.901',
+  subscales: [
+    { name:'問題分解能力', code:'decomp', items:[
+      '我能將複雜的問題拆解為較小、可處理的子問題。',
+      '面對結構不良的問題時，我能辨識出可拆分的關鍵元素。',
+      '我能識別問題中的核心輸入、處理、輸出三段結構。',
+      '我能判斷哪些子問題彼此獨立，哪些必須依序處理。'
+    ]},
+    { name:'流程與邏輯思考', code:'logic', items:[
+      '我能設計清楚的步驟序列來解決一個問題。',
+      '我能用流程圖或圖示方式表達演算法邏輯。',
+      '我會考慮條件判斷與分支處理。',
+      '我能評估流程是否有冗餘或可優化之處。'
+    ]},
+    { name:'演算法理解', code:'algo', items:[
+      '我能理解常見演算法（排序、搜尋、迴圈）的運作原理。',
+      '我能根據問題特性選擇合適的演算法策略。',
+      '我能估計演算法的時間或空間複雜度。',
+      '我能將自然語言描述轉換為可執行的演算法。'
+    ]},
+    { name:'除錯與修正', code:'debug', items:[
+      '我能系統性地定位程式錯誤的位置。',
+      '我能區分語法錯誤、邏輯錯誤與執行期錯誤。',
+      '我會運用測試案例驗證程式正確性。',
+      '我能在發現錯誤後迅速調整並重新測試。'
+    ]}
+  ]
+};
+
+const C4_SCALE = {
+  title: '4C 素養知覺問卷',
+  alpha: '.876',
+  subscales: [
+    { name:'批判性思考', code:'critical', items:[
+      '我會對 AI 提供的資訊進行批判性評估。',
+      '我能辨識資訊來源的可靠性與偏見。',
+      '我會多角度思考問題並質疑既有假設。'
+    ]},
+    { name:'溝通', code:'comm', items:[
+      '我能清楚地向他人表達我的解題思路。',
+      '我能將技術內容轉譯為非技術受眾可理解的語言。',
+      '我會主動傾聽並回應他人的觀點。'
+    ]},
+    { name:'合作', code:'collab', items:[
+      '我能與同儕有效協作完成複雜任務。',
+      '我願意接納不同的解題方法。',
+      '我能在團隊中承擔相應的角色與責任。'
+    ]},
+    { name:'創造力與創新', code:'create', items:[
+      '我能提出新穎的解題方法。',
+      '我能將不同領域的知識整合應用。',
+      '我願意嘗試非傳統的途徑解決問題。'
+    ]}
+  ]
+};
+
+function renderScales(){
+  const c = $('#scale-container');
+  c.innerHTML = '';
+  let qIndex = 1;
+
+  [CT_SCALE, C4_SCALE].forEach(scale => {
+    const section = document.createElement('div');
+    section.className = 'scale-section';
+    section.innerHTML = `
+      <h4>${scale.title}</h4>
+      <div class="scale-meta">
+        <span class="badge">5 點 LIKERT</span>
+        <span>Cronbach's α = ${scale.alpha}</span>
+      </div>
+    `;
+    scale.subscales.forEach(sub => {
+      const subWrap = document.createElement('div');
+      subWrap.innerHTML = `<h5 style="font-family:Noto Serif TC;margin:18px 0 6px;color:var(--ink-2);font-size:15px;font-weight:700">▍${sub.name}</h5>`;
+      sub.items.forEach((item, i) => {
+        const id = `q_${sub.code}_${i}`;
+        const row = document.createElement('div');
+        row.className = 'scale-item';
+        row.innerHTML = `
+          <div class="scale-item-text">
+            <span class="qnum">${qIndex.toString().padStart(2,'0')}.</span>${item}
+          </div>
+          <div class="likert" data-sub="${sub.code}" data-idx="${i}">
+            ${[1,2,3,4,5].map(v => `
+              <input type="radio" name="${id}" id="${id}_${v}" value="${v}">
+              <label for="${id}_${v}">${v}</label>
+            `).join('')}
+          </div>
+        `;
+        subWrap.appendChild(row);
+        qIndex++;
+      });
+      // 5 點圖例（第一題加上）
+      const legend = document.createElement('div');
+      legend.className = 'likert-legend';
+      legend.innerHTML = '<span>1 = 非常不同意</span><span>3 = 中立</span><span>5 = 非常同意</span>';
+      subWrap.appendChild(legend);
+      section.appendChild(subWrap);
+    });
+    c.appendChild(section);
+  });
+}
+renderScales();
+
+function submitAssessment(){
+  const id = $('#stu-id').value.trim();
+  const name = $('#stu-name').value.trim();
+  const phase = $('#stu-phase').value;
+  if(!id){ toast('請填寫學號 / 識別碼'); return; }
+
+  // 收集分數
+  const scores = { ct:{}, c4:{}, total:{} };
+  let allAnswered = true;
+
+  [CT_SCALE, C4_SCALE].forEach((scale, scaleIdx) => {
+    const key = scaleIdx === 0 ? 'ct' : 'c4';
+    scale.subscales.forEach(sub => {
+      let total = 0, count = 0;
+      sub.items.forEach((_, i) => {
+        const name = `q_${sub.code}_${i}`;
+        const chk = document.querySelector(`input[name="${name}"]:checked`);
+        if(chk){ total += parseInt(chk.value); count++; }
+        else allAnswered = false;
+      });
+      scores[key][sub.code] = count ? +(total/count).toFixed(2) : 0;
+    });
+    // 整體
+    const subs = Object.values(scores[key]);
+    scores.total[key] = subs.length ? +(subs.reduce((a,b)=>a+b,0)/subs.length).toFixed(2) : 0;
+  });
+
+  if(!allAnswered){
+    if(!confirm('還有題目未作答，仍要提交嗎？未答題會以 0 分計算（建議完整作答）')){
+      return;
+    }
+  }
+
+  const record = {
+    id, name, phase,
+    ts: Date.now(),
+    scores
+  };
+  saveRecord(record);
+
+  // 顯示結果
+  showResult(record);
+  toast('已提交，您的個人分數報告已產生');
+  $('#result-pane').scrollIntoView({behavior:'smooth'});
+}
+
+let radarChart = null;
+function showResult(rec){
+  $('#result-pane').style.display = '';
+  $('#result-meta').textContent = `學號 ${rec.id}　|　${rec.name || '匿名'}　|　${rec.phase === 'pre' ? '前測' : '後測'}　|　${new Date(rec.ts).toLocaleString('zh-TW')}`;
+
+  const dims = [
+    {key:'ct', sub:'decomp', label:'問題分解'},
+    {key:'ct', sub:'logic', label:'流程邏輯'},
+    {key:'ct', sub:'algo', label:'演算法理解'},
+    {key:'ct', sub:'debug', label:'除錯修正'},
+    {key:'c4', sub:'critical', label:'批判性思考'},
+    {key:'c4', sub:'comm', label:'溝通'},
+    {key:'c4', sub:'collab', label:'合作'},
+    {key:'c4', sub:'create', label:'創造力與創新'},
+  ];
+
+  $('#result-grid').innerHTML = `
+    <div class="result-item">
+      <div class="v">${rec.scores.total.ct}</div>
+      <div class="l">運算思維整體</div>
+    </div>
+    <div class="result-item">
+      <div class="v">${rec.scores.total.c4}</div>
+      <div class="l">4C 素養整體</div>
+    </div>
+    <div class="result-item">
+      <div class="v">${Math.max(...dims.map(d => rec.scores[d.key][d.sub])).toFixed(2)}</div>
+      <div class="l">最高向度分數</div>
+    </div>
+    <div class="result-item">
+      <div class="v">${dims.length}</div>
+      <div class="l">已測量向度</div>
+    </div>
+  `;
+
+  // Radar
+  const ctx = $('#radarChart').getContext('2d');
+  if(radarChart) radarChart.destroy();
+  radarChart = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels: dims.map(d => d.label),
+      datasets: [{
+        label: '本次得分',
+        data: dims.map(d => rec.scores[d.key][d.sub]),
+        backgroundColor: 'rgba(190,18,60,.15)',
+        borderColor: 'rgba(190,18,60,.85)',
+        borderWidth: 2,
+        pointBackgroundColor: '#be123c',
+        pointRadius: 4
+      }]
+    },
+    options: {
+      scales: {
+        r: { min:0, max:5, ticks:{stepSize:1, color:'#6b7785'}, grid:{color:'#d8cfbe'}, angleLines:{color:'#d8cfbe'} }
+      },
+      plugins: { legend:{display:false} }
+    }
+  });
+}
+
+function saveReflection(){
+  const records = getRecords();
+  if(records.length === 0){ toast('請先完成評量再儲存反思'); return; }
+  const last = records[records.length-1];
+  last.reflection = {
+    r1: $('#reflect-1').value,
+    r2: $('#reflect-2').value,
+    r3: $('#reflect-3').value
+  };
+  const d = getStore();
+  d.records[d.records.length-1] = last;
+  setStore(d);
+  toast('反思紀錄已儲存');
+}
+
+/* =========================================================
+   教師後台
+   ========================================================= */
+let compareChart = null;
+function renderTeacherDashboard(){
+  const records = getRecords();
+
+  // 統計
+  const statsBox = $('#teacher-stats');
+  if(records.length === 0){
+    statsBox.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">尚無提交紀錄。可點擊「載入示範資料」查看效果。</div>`;
+  } else {
+    const preRecs = records.filter(r => r.phase === 'pre');
+    const postRecs = records.filter(r => r.phase === 'post');
+    const mean = (arr, key, sub) => {
+      const vals = arr.map(r => sub ? r.scores[key][sub] : r.scores.total[key]).filter(x => x > 0);
+      if(vals.length === 0) return 0;
+      return (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2);
+    };
+    statsBox.innerHTML = `
+      <div class="result-item" style="border-left-color:var(--c-p1)">
+        <div class="v" style="color:var(--ink)">${records.length}</div>
+        <div class="l" style="color:var(--muted)">總提交數</div>
+      </div>
+      <div class="result-item" style="border-left-color:var(--c-p2)">
+        <div class="v" style="color:var(--ink)">${preRecs.length} / ${postRecs.length}</div>
+        <div class="l" style="color:var(--muted)">前測 / 後測筆數</div>
+      </div>
+      <div class="result-item" style="border-left-color:var(--c-p3)">
+        <div class="v" style="color:var(--ink)">${mean(records,'ct')}</div>
+        <div class="l" style="color:var(--muted)">CT 整體均分</div>
+      </div>
+      <div class="result-item" style="border-left-color:var(--c-p4)">
+        <div class="v" style="color:var(--ink)">${mean(records,'c4')}</div>
+        <div class="l" style="color:var(--muted)">4C 整體均分</div>
+      </div>
+    `;
+
+    // 比較圖
+    drawCompareChart(preRecs, postRecs);
+  }
+
+  // 紀錄表格
+  const tableBox = $('#records-container');
+  if(records.length === 0){
+    tableBox.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">📭</div>
+        <h4>尚未有任何評量紀錄</h4>
+        <p>學生提交評量後，資料會自動出現於此</p>
+      </div>
+    `;
+  } else {
+    const rows = records.map((r, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${escapeHtml(r.id)}</strong></td>
+        <td>${escapeHtml(r.name || '—')}</td>
+        <td><span class="badge" style="background:${r.phase==='pre'?'#6b7785':'#be123c'};color:#fff;padding:2px 8px;border-radius:4px;font-size:11px">${r.phase==='pre'?'前測':'後測'}</span></td>
+        <td>${r.scores.total.ct}</td>
+        <td>${r.scores.total.c4}</td>
+        <td style="color:var(--muted);font-size:12px">${new Date(r.ts).toLocaleString('zh-TW')}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="deleteRecord(${i})">刪除</button></td>
+      </tr>
+    `).join('');
+    tableBox.innerHTML = `
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th><th>學號</th><th>姓名</th><th>階段</th><th>CT 整體</th><th>4C 整體</th><th>提交時間</th><th>操作</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    `;
+  }
+}
+
+function drawCompareChart(preRecs, postRecs){
+  const ctx = $('#compareChart').getContext('2d');
+  if(compareChart) compareChart.destroy();
+  const mean = (arr, key) => {
+    const vals = arr.map(r => r.scores.total[key]).filter(x => x > 0);
+    return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  };
+
+  compareChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['運算思維（整體）', '4C 素養（整體）'],
+      datasets: [
+        {
+          label: '前測平均',
+          data: [mean(preRecs,'ct'), mean(preRecs,'c4')],
+          backgroundColor: 'rgba(107,119,133,.7)'
+        },
+        {
+          label: '後測平均',
+          data: [mean(postRecs,'ct'), mean(postRecs,'c4')],
+          backgroundColor: 'rgba(190,18,60,.85)'
+        }
+      ]
+    },
+    options: {
+      scales: { y:{ min:0, max:5, ticks:{stepSize:1} } },
+      plugins: { legend:{position:'top'} }
+    }
+  });
+}
+
+function deleteRecord(idx){
+  if(!confirm('確定刪除此筆紀錄？')) return;
+  const d = getStore();
+  d.records.splice(idx, 1);
+  setStore(d);
+  renderTeacherDashboard();
+  toast('已刪除');
+}
+
+function exportCSV(){
+  const records = getRecords();
+  if(records.length === 0){ toast('尚無資料可匯出'); return; }
+  const headers = ['#','學號','姓名','階段','CT_整體','CT_問題分解','CT_流程邏輯','CT_演算法','CT_除錯','4C_整體','4C_批判','4C_溝通','4C_合作','4C_創造','提交時間'];
+  const rows = records.map((r, i) => [
+    i+1, r.id, r.name||'',
+    r.phase==='pre'?'前測':'後測',
+    r.scores.total.ct,
+    r.scores.ct.decomp, r.scores.ct.logic, r.scores.ct.algo, r.scores.ct.debug,
+    r.scores.total.c4,
+    r.scores.c4.critical, r.scores.c4.comm, r.scores.c4.collab, r.scores.c4.create,
+    new Date(r.ts).toISOString()
+  ]);
+  const csv = '\ufeff' + [headers, ...rows].map(row => row.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `assessment_records_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV 已匯出（含 BOM，Excel 可直接開啟）');
+}
+
+function exportJSON(){
+  const data = getStore();
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `aict_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('JSON 備份已匯出');
+}
+
+function clearAllData(){
+  if(!confirm('將清空所有評量紀錄與草稿，此操作不可復原。確定？')) return;
+  localStorage.removeItem(STORE_KEY);
+  renderTeacherDashboard();
+  toast('已清空全部資料');
+}
+
+function loadDemoData(){
+  const demoRecords = generateDemoRecords();
+  const d = getStore();
+  d.records = (d.records || []).concat(demoRecords);
+  setStore(d);
+  renderTeacherDashboard();
+  toast(`已載入 ${demoRecords.length} 筆示範資料`);
+}
+
+function generateDemoRecords(){
+  const recs = [];
+  // 模擬論文之分布：前測 M ≈ 3.0, 後測 M ≈ 3.9
+  for(let i = 0; i < 20; i++){
+    const id = `S2026${String(i+1).padStart(3,'0')}`;
+    const phase = i < 10 ? 'pre' : 'post';
+    const base = phase === 'pre' ? 3.0 : 3.9;
+    const noise = () => +((Math.random()-.5) * 0.8).toFixed(2);
+    const ct = {
+      decomp: Math.min(5, Math.max(1, base + noise() + .1)),
+      logic:  Math.min(5, Math.max(1, base + noise())),
+      algo:   Math.min(5, Math.max(1, base + noise() + .05)),
+      debug:  Math.min(5, Math.max(1, base + noise() - .05))
+    };
+    const c4 = {
+      critical: Math.min(5, Math.max(1, base + noise() + .2)),
+      comm:     Math.min(5, Math.max(1, base + noise() + .1)),
+      collab:   Math.min(5, Math.max(1, base + noise() + .15)),
+      create:   Math.min(5, Math.max(1, base + noise() + .2))
+    };
+    Object.keys(ct).forEach(k => ct[k] = +ct[k].toFixed(2));
+    Object.keys(c4).forEach(k => c4[k] = +c4[k].toFixed(2));
+    recs.push({
+      id, name: `學生${i+1}`, phase,
+      ts: Date.now() - (20-i)*86400000,
+      scores: {
+        ct,
+        c4,
+        total: {
+          ct: +((ct.decomp+ct.logic+ct.algo+ct.debug)/4).toFixed(2),
+          c4: +((c4.critical+c4.comm+c4.collab+c4.create)/4).toFixed(2)
+        }
+      }
+    });
+  }
+  return recs;
+}
+
+/* =========================================================
+   初始化：讀取本地草稿
+   ========================================================= */
+function init(){
+  const d = getStore();
+  if(d.mindmap){
+    $('#branch-input').value = d.mindmap.input || '';
+    $('#branch-process').value = d.mindmap.process || '';
+    $('#branch-output').value = d.mindmap.output || '';
+  }
+  if(d.script){
+    $('#script-title').value = d.script.title || '';
+    $('#script-act1').value = d.script.act1 || '';
+    $('#script-act2').value = d.script.act2 || '';
+    $('#script-act3').value = d.script.act3 || '';
+  }
+}
+init();
+</script>
+
+</body>
+</html>
